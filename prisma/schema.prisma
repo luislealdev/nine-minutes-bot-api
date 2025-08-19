@@ -1,0 +1,19 @@
+// Prisma client generator configuration
+generator client {
+    provider = "prisma-client-js"
+}
+
+// Data source configuration (PostgreSQL database)
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model SurveyProgress {
+    id              Int      @id @default(autoincrement())
+    currentQuestion Int?
+    phoneNumber     String?
+    isCompleted     Boolean  @default(false)
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @default(now())
+}
