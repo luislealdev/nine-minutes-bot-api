@@ -1,4 +1,8 @@
-const apiUrl = "https://luislealsoftware-whatsapp-api.creativa2020.com.mx/api";
+const apiUrl = "https://polls-vistacenter.creativa2020.com.mx/api";
+interface WhatsAppPoll {
+  question: string;
+  options: string[];
+}
 
 export const sendWhatsApp = async (phone: string, message: string) => {
 
@@ -34,45 +38,45 @@ export const sendWhatsApp = async (phone: string, message: string) => {
 
         body: JSON.stringify({
             chatId: `${sendTo}@c.us`,
-            text: `${message}`,
-            session: "vistacenter",
+            text: `*Nine Minutes*\n${message}\n¿Tienes dudas? Llámanos.`,
+            session: "nine-minutes-bot-api",
         })
     });
 }
 
-// export const sendWhatsAppPoll = async (phone: string, json: any) => {
-//     // Limpiar el número (remover espacios, guiones, paréntesis)
-//     const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
+export const sendWhatsAppPoll = async (phone: string, json: WhatsAppPoll) => {
+    // Limpiar el número (remover espacios, guiones, paréntesis)
+    const cleanPhone = phone.replace(/[\s\-\(\)\+]/g, '');
 
-//     // Verificar si ya tiene código de país y formatear
-//     let formattedPhone = '';
-//     if (cleanPhone.startsWith('1') && cleanPhone.length === 11) {
-//         // Ya tiene +1 (formato estadounidense), mantenerlo
-//         formattedPhone = cleanPhone;
-//     } else if (cleanPhone.startsWith('521') && cleanPhone.length === 13) {
-//         // Ya tiene 521 (código mexicano), mantenerlo
-//         formattedPhone = cleanPhone;
-//     } else if (cleanPhone.length === 10) {
-//         // Número mexicano sin código de país, agregar 521
-//         formattedPhone = '521' + cleanPhone;
-//     } else {
-//         // Para otros casos, usar el número tal como viene
-//         formattedPhone = cleanPhone;
-//     }
+    // Verificar si ya tiene código de país y formatear
+    let formattedPhone = '';
+    if (cleanPhone.startsWith('1') && cleanPhone.length === 11) {
+        // Ya tiene +1 (formato estadounidense), mantenerlo
+        formattedPhone = cleanPhone;
+    } else if (cleanPhone.startsWith('521') && cleanPhone.length === 13) {
+        // Ya tiene 521 (código mexicano), mantenerlo
+        formattedPhone = cleanPhone;
+    } else if (cleanPhone.length === 10) {
+        // Número mexicano sin código de país, agregar 521
+        formattedPhone = '521' + cleanPhone;
+    } else {
+        // Para otros casos, usar el número tal como viene
+        formattedPhone = cleanPhone;
+    }
 
-//     const sendTo = formattedPhone;
+    const sendTo = formattedPhone;
 
-//     const resp = await fetch(`${"https://polls-vistacenter.creativa2020.com.mx/api"}/sendPoll`, {
-//         method: 'POST',
-//         headers: {
-//             'Accept': 'application/json',
-//             'Content-Type': 'application/json',
-//             'X-Api-Key': process.env.WAHA_API_KEY || '', //
-//         },
+    const resp = await fetch(`${"https://polls-vistacenter.creativa2020.com.mx/api"}/sendPoll`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Api-Key': process.env.WAHA_API_KEY || '',
+        },
 
-//         body: JSON.stringify({ ...json, chatId: `${sendTo}@c.us`, session: "vistacenter" })
-//     });
+        body: JSON.stringify({ ...json, chatId: `${sendTo}@c.us`, session: "nine-minutes-bot-api" })
+    });
 
-//     console.log(resp);
+    console.log(resp);
 
-// }
+}
