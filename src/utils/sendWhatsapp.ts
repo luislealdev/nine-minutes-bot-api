@@ -21,8 +21,6 @@ export const sendWhatsApp = async (phone: string, message: string) => {
 
     const sendTo = formattedPhone;
 
-    // await fetch('https://whatsapp-api.creativa2020.com.mx/api/sendText', {
-    // TODO: Cambiar a la API de Waha
     await fetch('https://luislealsoftware-whatsapp-api.creativa2020.com.mx/api/sendText', {
 
         method: 'POST',

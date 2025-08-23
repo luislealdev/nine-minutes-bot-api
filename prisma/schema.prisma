@@ -13,6 +13,7 @@ model SurveyProgress {
     id              Int      @id @default(autoincrement())
     currentQuestion Int?
     phoneNumber     String?
+    sucursal        String?  // Para guardar la sucursal mencionada
     isCompleted     Boolean  @default(false)
     createdAt       DateTime @default(now())
     updatedAt       DateTime @default(now())
