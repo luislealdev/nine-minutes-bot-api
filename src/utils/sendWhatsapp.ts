@@ -33,7 +33,7 @@ export const sendWhatsApp = async (phone: string, message: string) => {
         body: JSON.stringify({
             chatId: `${sendTo}@c.us`,
             text: `${message}\n\n`,
-            session: "nine-minutes-bot",
+            session: "pizza-york",
         })
     });
 
