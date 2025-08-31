@@ -4,70 +4,101 @@ import prisma from '@/lib/prisma';
 
 // Array de las preguntas para solicitud de empleo - Pizzayork
 const JOB_QUESTIONS = [
-  "¡Hola! Bienvenido al proceso de solicitud de empleo de Pizzayork. 🍕\n\n¿Tienes al menos 18 años de edad?",
+  "¡Hola! Bienvenido al proceso de solicitud de empleo de Pizzayork. 🍕🗽\n\n¿Tienes al menos 18 años de edad?",
   "¿A qué sucursal de Pizzayork te gustaría aplicar? (Por favor menciona la sucursal o zona de tu preferencia)",
   "¿Tienes disponibilidad para rotar entre turno matutino y vespertino?",
   "¿Tienes disponibilidad para trabajar fines de semana?"
 ];
 
-// Información de sucursales Pizzayork
-const BRANCH_INFO = {
-  sucursales: {
-    "centro": {
-      nombre: "Sucursal Centro",
-      direccion: "Av. Juárez #456, Centro Histórico"
-    },
-    "norte": {
-      nombre: "Sucursal Norte",
-      direccion: "Blvd. Norte #123, Col. Norte"
-    },
-    "sur": {
-      nombre: "Sucursal Sur",
-      direccion: "Av. Sur #789, Col. Sur"
-    },
-    "plaza": {
-      nombre: "Sucursal Plaza",
-      direccion: "Plaza Comercial Local 15, Col. Plaza"
-    }
+// Información de sucursales actualizada
+const BRANCHES = [
+  {
+    key: "patria",
+    nombre: "Sucursal Patria",
+    telefono: "442 645 8226",
+    direccion: "Av. Patria 511, Plaza Patria 501, Local B, FRENTE AL UTEQ, Col. Pedrito Peñuelas, Querétaro, Qro."
   },
-
-  getFinalMessage: (sucursal: string) => {
-    // Buscar la sucursal mencionada
-    let selectedBranch = null;
-    const sucursalLower = sucursal.toLowerCase();
-
-    for (const [key, branch] of Object.entries(BRANCH_INFO.sucursales)) {
-      if (sucursalLower.includes(key) || sucursalLower.includes(branch.nombre.toLowerCase())) {
-        selectedBranch = branch;
-        break;
-      }
-    }
-
-    // Si no encuentra sucursal específica, usar mensaje genérico
-    if (!selectedBranch) {
-      return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud para Pizzayork.
-
-🍕 Por favor lleva tu solicitud de empleo de 11:00 AM a 7:00 PM y te contactaremos para entrevista.
-
-📍 Sucursales disponibles:
-• Sucursal Centro: Av. Juárez #456, Centro Histórico
-• Sucursal Norte: Blvd. Norte #123, Col. Norte  
-• Sucursal Sur: Av. Sur #789, Col. Sur
-• Sucursal Plaza: Plaza Comercial Local 15, Col. Plaza
-
-¡Te esperamos para formar parte del equipo Pizzayork! 🍕✨`;
-    }
-
-    return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud para Pizzayork.
-
-🍕 Aplicaste para: ${selectedBranch.nombre}
-📍 Dirección: ${selectedBranch.direccion}
-
-⏰ Por favor lleva tu solicitud de empleo de 11:00 AM a 7:00 PM y te contactaremos para entrevista.
-
-¡Te esperamos para formar parte del equipo Pizzayork! 🍕✨`;
+  {
+    key: "americas",
+    nombre: "Sucursal Américas",
+    telefono: "442 222 1540",
+    direccion: "Av. Las Americas esq. Francisco, Escudero 100, Reforma Agraria, 2A Sección, Querétaro, Qro."
+  },
+  {
+    key: "mompani",
+    nombre: "Sucursal Mompani",
+    telefono: "4424290530",
+    direccion: "Paseo de Querétaro 6102, Col. Paseos de San Miguel , Querétaro, Qro. JUNTO A LECAROZ"
+  },
+  {
+    key: "sanisidro",
+    nombre: "Sucursal San Isidro",
+    telefono: "464 162 9355",
+    direccion: "Av. Valle de Santiago 1500 A, Col. San Isidro JUNTO A POLLOS GUERRERO, Salamanca, Gto."
+  },
+  {
+    key: "centro",
+    nombre: "Sucursal Centro",
+    telefono: "4641629284",
+    direccion: "Sánchez Torrado 614 , Zona Centro, FRENTE AL TIANGUIS DE LOS MIÉRCOLES, Salamanca, Gto."
+  },
+  {
+    key: "apaseo",
+    nombre: "Sucursal Apaseo El Grande",
+    telefono: "4136903792",
+    direccion: "Andador Galeana 107 A, En el Jardín de los Enamorados, Zona Centro, Apaseo El Grande, Gto."
+  },
+  {
+    key: "comonfort",
+    nombre: "Sucursal Comonfort",
+    telefono: "4111602238",
+    direccion: "Ignacio Allende 26 D, Abajo de los Pasaportes y Visas, Zona Centro, Comonfort, Gto."
+  },
+  {
+    key: "jaral",
+    nombre: "Sucursal Jaral",
+    telefono: "411 688 2261",
+    direccion: "Porfirio Díaz 141, Zona Centro, jardín principal Jaral del Progreso, Gto."
+  },
+  {
+    key: "salvatierra",
+    nombre: "Sucursal Salvatierra",
+    telefono: "466 663 0348",
+    direccion: "Federico Escobedo, Zona Centro, Frente al Reloj del Mercado Hidalgo, Salvatierra, Gto."
   }
-};
+];
+
+function getBranchListMessage() {
+  let msg = "Estas son las sucursales disponibles para aplicar:\n\n";
+  BRANCHES.forEach((branch, idx) => {
+    msg += `${idx + 1}. ${branch.nombre}\n   Dirección: ${branch.direccion}\n`;
+  });
+  msg += "\nPor favor menciona el nombre o número de la sucursal de tu preferencia.";
+  return msg;
+}
+
+function getFinalMessage(sucursal: string) {
+  let selectedBranch = null;
+  const sucursalLower = sucursal.toLowerCase();
+  for (const [idx, branch] of BRANCHES.entries()) {
+    if (
+      sucursalLower.includes(branch.key) ||
+      sucursalLower.includes(branch.nombre.toLowerCase()) ||
+      sucursalLower.includes((idx + 1).toString())
+    ) {
+      selectedBranch = branch;
+      break;
+    }
+  }
+  if (!selectedBranch) {
+    let msg = `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\n`;
+    msg += `Por favor lleva tu solicitud de empleo de 11:00 AM a 7:00 PM y te contactaremos para entrevista.\n\n`;
+    msg += getBranchListMessage();
+    msg += "\n\n¡Te esperamos para formar parte del equipo! 🍕🗽✨";
+    return msg;
+  }
+  return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\nAplicaste para: ${selectedBranch.nombre}\n📍 Dirección: ${selectedBranch.direccion}\n📞 Teléfono: ${selectedBranch.telefono}\n\nPor favor lleva tu solicitud de empleo de 11:00 AM a 7:00 PM y te contactaremos para entrevista.\n\n¡Te esperamos para formar parte del equipo! 🍕🗽✨`;
+}
 
 // Manejador para peticiones POST (webhook de WhatsApp)
 export async function POST(req: NextRequest) {
@@ -108,16 +139,15 @@ export async function POST(req: NextRequest) {
     if (!progress) {
       // Solo iniciar el proceso si el mensaje incluye "empleo"
       if (message.toLowerCase().includes("empleo")) {
-        // Crear nuevo progreso y enviar primera pregunta
+        // Crear nuevo progreso y enviar primera pregunta y sucursales
         progress = await prisma.surveyProgress.create({
           data: {
             phoneNumber: phone,
             currentQuestion: 1
           }
         });
-
+        await sendWhatsApp(phone, getBranchListMessage());
         await sendWhatsApp(phone, JOB_QUESTIONS[0]);
-
         return NextResponse.json({
           success: true,
           message: 'Proceso de solicitud iniciado',
@@ -125,24 +155,47 @@ export async function POST(req: NextRequest) {
           timestamp: new Date().toISOString()
         });
       } else {
-        // Si no incluye "empleo", ignorar el mensaje
-        return NextResponse.json({
-          success: true,
-          message: 'Mensaje ignorado - no contiene palabras clave',
-          timestamp: new Date().toISOString()
-        });
+        // Si no incluye "empleo", no responder nada
+        return new Response(null, { status: 204 });
       }
     }
 
     // Si ya completó el proceso
     if (progress.isCompleted) {
-      await sendWhatsApp(phone, "Ya has completado tu solicitud de empleo. ¡Gracias por tu interés!");
-
-      return NextResponse.json({
-        success: true,
-        message: 'Solicitud ya completada',
-        timestamp: new Date().toISOString()
-      });
+      // Si el mensaje incluye "empleo", verificar fecha de última aplicación
+      if (message.toLowerCase().includes("empleo")) {
+        const lastApplied = progress.updatedAt || progress.createdAt;
+        const now = new Date();
+        const diffMs = now.getTime() - new Date(lastApplied).getTime();
+        const diffDays = diffMs / (1000 * 60 * 60 * 24);
+        if (diffDays < 90) {
+          await sendWhatsApp(phone, `Gracias por tu interés. Ya has aplicado recientemente. Puedes volver a aplicar después de 3 meses desde tu última solicitud.`);
+          return NextResponse.json({
+            success: true,
+            message: 'Solicitud ya completada, debe esperar 3 meses',
+            timestamp: now.toISOString()
+          });
+        } else {
+          // Permitir nueva aplicación
+          await prisma.surveyProgress.create({
+            data: {
+              phoneNumber: phone,
+              currentQuestion: 1
+            }
+          });
+          await sendWhatsApp(phone, getBranchListMessage());
+          await sendWhatsApp(phone, JOB_QUESTIONS[0]);
+          return NextResponse.json({
+            success: true,
+            message: 'Nuevo proceso de solicitud iniciado',
+            currentQuestion: 1,
+            timestamp: now.toISOString()
+          });
+        }
+      } else {
+        // Si no incluye "empleo", no responder nada
+        return new Response(null, { status: 204 });
+      }
     }
 
     // Procesar respuesta
@@ -153,7 +206,6 @@ export async function POST(req: NextRequest) {
     if (currentQuestion === 2) {
       // Guardar la sucursal mencionada
       const nextQuestion = currentQuestion + 1;
-
       await prisma.surveyProgress.update({
         where: { id: progress.id },
         data: {
@@ -161,9 +213,7 @@ export async function POST(req: NextRequest) {
           sucursal: message // Guardar la respuesta de sucursal
         }
       });
-
       await sendWhatsApp(phone, `✅ Perfecto! Sucursal registrada.\n\n${JOB_QUESTIONS[nextQuestion - 1]}`);
-
       return NextResponse.json({
         success: true,
         message: 'Sucursal registrada',
@@ -175,14 +225,12 @@ export async function POST(req: NextRequest) {
     // Para las demás preguntas, solo aceptar sí/no
     if (answerValue === "si" || answerValue === "sí") {
       const nextQuestion = currentQuestion + 1;
-
       if (nextQuestion <= JOB_QUESTIONS.length) {
         // Avanzar a la siguiente pregunta
         await prisma.surveyProgress.update({
           where: { id: progress.id },
           data: { currentQuestion: nextQuestion }
         });
-
         await sendWhatsApp(phone, `✅ Perfecto!\n\n${JOB_QUESTIONS[nextQuestion - 1]}`);
       } else {
         // Todas las preguntas completadas con "sí"
@@ -190,38 +238,28 @@ export async function POST(req: NextRequest) {
           where: { id: progress.id },
           data: { isCompleted: true }
         });
-
         // Usar la sucursal guardada en el progreso
         const sucursalMencionada = progress.sucursal || "";
-        await sendWhatsApp(phone, BRANCH_INFO.getFinalMessage(sucursalMencionada));
+        await sendWhatsApp(phone, getFinalMessage(sucursalMencionada));
       }
-
       return NextResponse.json({
         success: true,
         message: 'Respuesta afirmativa procesada',
         currentQuestion: nextQuestion > JOB_QUESTIONS.length ? 'completed' : nextQuestion,
         timestamp: new Date().toISOString()
       });
-
     } else if (answerValue === "no") {
       // Terminar proceso por respuesta negativa
       await prisma.surveyProgress.update({
         where: { id: progress.id },
         data: { isCompleted: true }
       });
-
-      await sendWhatsApp(phone, `Gracias por tu interés en Pizzayork, ${senderName}. 
-
-Lamentablemente en este momento no cumples con todos los requisitos para el puesto, pero te invitamos a aplicar nuevamente en el futuro.
-
-¡Te deseamos mucho éxito! 🍕`);
-
+      await sendWhatsApp(phone, `Gracias por tu interés, ${senderName}.\n\nLamentablemente en este momento no cumples con todos los requisitos para el puesto, pero te invitamos a aplicar nuevamente en el futuro.\n\n¡Te deseamos mucho éxito! 🍕🗽`);
       return NextResponse.json({
         success: true,
         message: 'Solicitud terminada por respuesta negativa',
         timestamp: new Date().toISOString()
       });
-
     } else {
       // Respuesta no válida (excepto para pregunta de sucursal)
       if (currentQuestion === 2) {
@@ -229,7 +267,6 @@ Lamentablemente en este momento no cumples con todos los requisitos para el pues
       } else {
         await sendWhatsApp(phone, "Por favor responde únicamente con 'sí' o 'no' para continuar con el proceso.");
       }
-
       return NextResponse.json({
         success: true,
         message: 'Respuesta no válida',
