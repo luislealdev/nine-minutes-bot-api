@@ -136,10 +136,39 @@ export async function POST(req: NextRequest) {
     });
 
     if (!progress) {
-      // Solo iniciar el proceso si el mensaje incluye "empleo"
-      if (message.toLowerCase().includes("empleo")) {
-        // Crear nuevo progreso y enviar primera pregunta
-        progress = await prisma.surveyProgress.create({
+      // Iniciar el proceso con cualquier mensaje
+      progress = await prisma.surveyProgress.create({
+        data: {
+          phoneNumber: phone,
+          currentQuestion: 1
+        }
+      });
+      await sendWhatsApp(phone, JOB_QUESTIONS[0]);
+      return NextResponse.json({
+        success: true,
+        message: 'Proceso de solicitud iniciado',
+        currentQuestion: 1,
+        timestamp: new Date().toISOString()
+      });
+    }
+
+    // Si ya completó el proceso
+    if (progress.isCompleted) {
+      // Verificar fecha de última aplicación
+      const lastApplied = progress.updatedAt || progress.createdAt;
+      const now = new Date();
+      const diffMs = now.getTime() - new Date(lastApplied).getTime();
+      const diffDays = diffMs / (1000 * 60 * 60 * 24);
+      if (diffDays < 90) {
+        await sendWhatsApp(phone, `Gracias por tu interés. Ya has aplicado recientemente. Puedes volver a aplicar después de 3 meses desde tu última solicitud.`);
+        return NextResponse.json({
+          success: true,
+          message: 'Solicitud ya completada, debe esperar 3 meses',
+          timestamp: now.toISOString()
+        });
+      } else {
+        // Permitir nueva aplicación
+        await prisma.surveyProgress.create({
           data: {
             phoneNumber: phone,
             currentQuestion: 1
@@ -148,50 +177,10 @@ export async function POST(req: NextRequest) {
         await sendWhatsApp(phone, JOB_QUESTIONS[0]);
         return NextResponse.json({
           success: true,
-          message: 'Proceso de solicitud iniciado',
+          message: 'Nuevo proceso de solicitud iniciado',
           currentQuestion: 1,
-          timestamp: new Date().toISOString()
+          timestamp: now.toISOString()
         });
-      } else {
-        // Si no incluye "empleo", no responder nada
-        return new Response(null, { status: 204 });
-      }
-    }
-
-    // Si ya completó el proceso
-    if (progress.isCompleted) {
-      // Si el mensaje incluye "empleo", verificar fecha de última aplicación
-      if (message.toLowerCase().includes("empleo")) {
-        const lastApplied = progress.updatedAt || progress.createdAt;
-        const now = new Date();
-        const diffMs = now.getTime() - new Date(lastApplied).getTime();
-        const diffDays = diffMs / (1000 * 60 * 60 * 24);
-        if (diffDays < 90) {
-          await sendWhatsApp(phone, `Gracias por tu interés. Ya has aplicado recientemente. Puedes volver a aplicar después de 3 meses desde tu última solicitud.`);
-          return NextResponse.json({
-            success: true,
-            message: 'Solicitud ya completada, debe esperar 3 meses',
-            timestamp: now.toISOString()
-          });
-        } else {
-          // Permitir nueva aplicación
-          await prisma.surveyProgress.create({
-            data: {
-              phoneNumber: phone,
-              currentQuestion: 1
-            }
-          });
-          await sendWhatsApp(phone, JOB_QUESTIONS[0]);
-          return NextResponse.json({
-            success: true,
-            message: 'Nuevo proceso de solicitud iniciado',
-            currentQuestion: 1,
-            timestamp: now.toISOString()
-          });
-        }
-      } else {
-        // Si no incluye "empleo", no responder nada
-        return new Response(null, { status: 204 });
       }
     }
 
