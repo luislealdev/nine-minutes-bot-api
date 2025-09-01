@@ -15,62 +15,62 @@ const BRANCHES = [
     key: "patria",
     nombre: "Sucursal Patria",
     telefono: "442 645 8226",
-    direccion: "Av. Patria 511, Plaza Patria 501, Local B, FRENTE AL UTEQ, Col. Pedrito Peñuelas, Querétaro, Qro."
+    direccion: "Av. Patria 511, Querétaro, Qro."
   },
   {
     key: "americas",
     nombre: "Sucursal Américas",
     telefono: "442 222 1540",
-    direccion: "Av. Las Americas esq. Francisco, Escudero 100, Reforma Agraria, 2A Sección, Querétaro, Qro."
+    direccion: "Av. Las Americas, Querétaro, Qro."
   },
   {
     key: "mompani",
     nombre: "Sucursal Mompani",
     telefono: "4424290530",
-    direccion: "Paseo de Querétaro 6102, Col. Paseos de San Miguel , Querétaro, Qro. JUNTO A LECAROZ"
+    direccion: "Paseo de Querétaro 6102, Querétaro, Qro."
   },
   {
     key: "sanisidro",
     nombre: "Sucursal San Isidro",
     telefono: "464 162 9355",
-    direccion: "Av. Valle de Santiago 1500 A, Col. San Isidro JUNTO A POLLOS GUERRERO, Salamanca, Gto."
+    direccion: "Av. Valle de Santiago 1500A, Salamanca, Gto."
   },
   {
     key: "centro",
     nombre: "Sucursal Centro",
     telefono: "4641629284",
-    direccion: "Sánchez Torrado 614 , Zona Centro, FRENTE AL TIANGUIS DE LOS MIÉRCOLES, Salamanca, Gto."
+    direccion: "Sánchez Torrado 614, Salamanca, Gto."
   },
   {
     key: "apaseo",
     nombre: "Sucursal Apaseo El Grande",
     telefono: "4136903792",
-    direccion: "Andador Galeana 107 A, En el Jardín de los Enamorados, Zona Centro, Apaseo El Grande, Gto."
+    direccion: "Andador Galeana 107A, Apaseo El Grande, Gto."
   },
   {
     key: "comonfort",
     nombre: "Sucursal Comonfort",
     telefono: "4111602238",
-    direccion: "Ignacio Allende 26 D, Abajo de los Pasaportes y Visas, Zona Centro, Comonfort, Gto."
+    direccion: "Ignacio Allende 26D, Comonfort, Gto."
   },
   {
     key: "jaral",
     nombre: "Sucursal Jaral",
     telefono: "411 688 2261",
-    direccion: "Porfirio Díaz 141, Zona Centro, jardín principal Jaral del Progreso, Gto."
+    direccion: "Porfirio Díaz 141, Jaral del Progreso, Gto."
   },
   {
     key: "salvatierra",
     nombre: "Sucursal Salvatierra",
     telefono: "466 663 0348",
-    direccion: "Federico Escobedo, Zona Centro, Frente al Reloj del Mercado Hidalgo, Salvatierra, Gto."
+    direccion: "Federico Escobedo, Salvatierra, Gto."
   }
 ];
 
 function getBranchListMessage() {
   let msg = "Estas son las sucursales disponibles para aplicar:\n\n";
   BRANCHES.forEach((branch, idx) => {
-    msg += `${idx + 1}. ${branch.nombre}\n   Dirección: ${branch.direccion}\n\n`;
+    msg += `${idx + 1}. ${branch.nombre}\n(${branch.direccion}\n\n)`;
   });
   msg += "¿A qué sucursal de Pizzayork te gustaría aplicar? (Por favor menciona el nombre o número de la sucursal de tu preferencia)";
   return msg;
