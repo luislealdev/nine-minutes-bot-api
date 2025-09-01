@@ -70,7 +70,7 @@ const BRANCHES = [
 function getBranchListMessage() {
   let msg = "Estas son las sucursales disponibles para aplicar:\n\n";
   BRANCHES.forEach((branch, idx) => {
-    msg += `${idx + 1}. ${branch.nombre}\n(${branch.direccion}\n\n)`;
+    msg += `${idx + 1}. ${branch.nombre}(${branch.direccion})\n\n`;
   });
   msg += "¿A qué sucursal de Pizzayork te gustaría aplicar? (Por favor menciona el nombre o número de la sucursal de tu preferencia)";
   return msg;
