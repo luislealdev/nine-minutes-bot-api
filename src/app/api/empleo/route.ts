@@ -5,7 +5,6 @@ import prisma from '@/lib/prisma';
 // Array de las preguntas para solicitud de empleo - Pizzayork
 const JOB_QUESTIONS = [
   "¡Hola! Bienvenido al proceso de solicitud de empleo de Pizzayork. 🍕🗽\n\n¿Tienes al menos 18 años de edad?",
-  "¿A qué sucursal de Pizzayork te gustaría aplicar? (Por favor menciona la sucursal o zona de tu preferencia)",
   "¿Tienes disponibilidad para rotar entre turno matutino y vespertino?",
   "¿Tienes disponibilidad para trabajar fines de semana?"
 ];
@@ -71,9 +70,9 @@ const BRANCHES = [
 function getBranchListMessage() {
   let msg = "Estas son las sucursales disponibles para aplicar:\n\n";
   BRANCHES.forEach((branch, idx) => {
-    msg += `${idx + 1}. ${branch.nombre}\n   Dirección: ${branch.direccion}\n`;
+    msg += `${idx + 1}. ${branch.nombre}\n   Dirección: ${branch.direccion}\n\n`;
   });
-  msg += "\nPor favor menciona el nombre o número de la sucursal de tu preferencia.";
+  msg += "¿A qué sucursal de Pizzayork te gustaría aplicar? (Por favor menciona el nombre o número de la sucursal de tu preferencia)";
   return msg;
 }
 
@@ -139,14 +138,13 @@ export async function POST(req: NextRequest) {
     if (!progress) {
       // Solo iniciar el proceso si el mensaje incluye "empleo"
       if (message.toLowerCase().includes("empleo")) {
-        // Crear nuevo progreso y enviar primera pregunta y sucursales
+        // Crear nuevo progreso y enviar primera pregunta
         progress = await prisma.surveyProgress.create({
           data: {
             phoneNumber: phone,
             currentQuestion: 1
           }
         });
-        await sendWhatsApp(phone, getBranchListMessage());
         await sendWhatsApp(phone, JOB_QUESTIONS[0]);
         return NextResponse.json({
           success: true,
@@ -183,7 +181,6 @@ export async function POST(req: NextRequest) {
               currentQuestion: 1
             }
           });
-          await sendWhatsApp(phone, getBranchListMessage());
           await sendWhatsApp(phone, JOB_QUESTIONS[0]);
           return NextResponse.json({
             success: true,
@@ -202,36 +199,24 @@ export async function POST(req: NextRequest) {
     const answerValue = message.toLowerCase();
     const currentQuestion = progress.currentQuestion || 1;
 
-    // Para la pregunta 2 (sucursal), aceptar cualquier respuesta y continuar
-    if (currentQuestion === 2) {
-      // Guardar la sucursal mencionada
-      const nextQuestion = currentQuestion + 1;
-      await prisma.surveyProgress.update({
-        where: { id: progress.id },
-        data: {
-          currentQuestion: nextQuestion,
-          sucursal: message // Guardar la respuesta de sucursal
-        }
-      });
-      await sendWhatsApp(phone, `✅ Perfecto! Sucursal registrada.\n\n${JOB_QUESTIONS[nextQuestion - 1]}`);
-      return NextResponse.json({
-        success: true,
-        message: 'Sucursal registrada',
-        currentQuestion: nextQuestion,
-        timestamp: new Date().toISOString()
-      });
-    }
-
-    // Para las demás preguntas, solo aceptar sí/no
+    // Para las preguntas, solo aceptar sí/no
     if (answerValue === "si" || answerValue === "sí") {
       const nextQuestion = currentQuestion + 1;
-      if (nextQuestion <= JOB_QUESTIONS.length) {
-        // Avanzar a la siguiente pregunta
+
+      if (currentQuestion === 1) {
+        // Después de la primera pregunta (edad), mostrar sucursales
         await prisma.surveyProgress.update({
           where: { id: progress.id },
           data: { currentQuestion: nextQuestion }
         });
-        await sendWhatsApp(phone, `✅ Perfecto!\n\n${JOB_QUESTIONS[nextQuestion - 1]}`);
+        await sendWhatsApp(phone, `✅ Perfecto!\n\n${getBranchListMessage()}`);
+      } else if (nextQuestion <= JOB_QUESTIONS.length + 1) {
+        // Para las siguientes preguntas normales
+        await prisma.surveyProgress.update({
+          where: { id: progress.id },
+          data: { currentQuestion: nextQuestion }
+        });
+        await sendWhatsApp(phone, `✅ Perfecto!\n\n${JOB_QUESTIONS[nextQuestion - 2]}`);
       } else {
         // Todas las preguntas completadas con "sí"
         await prisma.surveyProgress.update({
@@ -245,7 +230,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         success: true,
         message: 'Respuesta afirmativa procesada',
-        currentQuestion: nextQuestion > JOB_QUESTIONS.length ? 'completed' : nextQuestion,
+        currentQuestion: nextQuestion > JOB_QUESTIONS.length + 1 ? 'completed' : nextQuestion,
         timestamp: new Date().toISOString()
       });
     } else if (answerValue === "no") {
@@ -261,17 +246,32 @@ export async function POST(req: NextRequest) {
         timestamp: new Date().toISOString()
       });
     } else {
-      // Respuesta no válida (excepto para pregunta de sucursal)
+      // Respuesta no válida o pregunta de sucursal
       if (currentQuestion === 2) {
-        await sendWhatsApp(phone, "Por favor menciona la sucursal de tu preferencia.");
+        // Guardar la sucursal mencionada
+        const nextQuestion = currentQuestion + 1;
+        await prisma.surveyProgress.update({
+          where: { id: progress.id },
+          data: {
+            currentQuestion: nextQuestion,
+            sucursal: message // Guardar la respuesta de sucursal
+          }
+        });
+        await sendWhatsApp(phone, `✅ Perfecto! Sucursal registrada.\n\n${JOB_QUESTIONS[nextQuestion - 2]}`);
+        return NextResponse.json({
+          success: true,
+          message: 'Sucursal registrada',
+          currentQuestion: nextQuestion,
+          timestamp: new Date().toISOString()
+        });
       } else {
         await sendWhatsApp(phone, "Por favor responde únicamente con 'sí' o 'no' para continuar con el proceso.");
+        return NextResponse.json({
+          success: true,
+          message: 'Respuesta no válida',
+          timestamp: new Date().toISOString()
+        });
       }
-      return NextResponse.json({
-        success: true,
-        message: 'Respuesta no válida',
-        timestamp: new Date().toISOString()
-      });
     }
 
   } catch (error) {
