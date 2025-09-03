@@ -67,36 +67,36 @@ const BRANCHES = [
   }
 ];
 
-function getBranchListMessage() {
-  let msg = "Estas son las sucursales disponibles para aplicar:\n\n";
-  BRANCHES.forEach((branch, idx) => {
-    msg += `${idx + 1}. ${branch.nombre} (${branch.direccion})\n\n`;
-  });
-  msg += "¿A qué sucursal de Pizzayork te gustaría aplicar? (Por favor menciona el nombre o número de la sucursal de tu preferencia)";
-  return msg;
-}
+
+// Generar palabras clave para cada sucursal
+const BRANCH_KEYWORDS = BRANCHES.map(branch => {
+  const keywords = [
+    branch.key.toLowerCase(),
+    branch.nombre.toLowerCase(),
+    branch.direccion.toLowerCase(),
+  ];
+  // Agregar variantes comunes
+  if (branch.nombre.toLowerCase().includes("jaral")) {
+    keywords.push("jaral del progreso", "jaral progreso", "progreso", "porfirio díaz", "gto jaral", "jaral gto");
+  }
+  return { branch, keywords };
+});
+
 
 function getFinalMessage(sucursal: string) {
-  let selectedBranch = null;
   const sucursalLower = sucursal.toLowerCase();
-  for (const [idx, branch] of BRANCHES.entries()) {
-    if (
-      sucursalLower.includes(branch.key) ||
-      sucursalLower.includes(branch.nombre.toLowerCase()) ||
-      sucursalLower.includes((idx + 1).toString())
-    ) {
+  let selectedBranch = null;
+  for (const { branch, keywords } of BRANCH_KEYWORDS) {
+    if (keywords.some(keyword => sucursalLower.includes(keyword))) {
       selectedBranch = branch;
       break;
     }
   }
-  if (!selectedBranch) {
-    let msg = `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\n`;
-    msg += `Por favor lleva tu solicitud de empleo de 11:00 AM a 7:00 PM y te contactaremos para entrevista.\n\n`;
-    msg += getBranchListMessage();
-    msg += "\n\n¡Te esperamos para formar parte del equipo! 🍕🗽✨";
-    return msg;
+  if (selectedBranch) {
+    return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\nAplicaste para: ${selectedBranch.nombre}\n📍 Dirección: ${selectedBranch.direccion}\n📞 Teléfono: ${selectedBranch.telefono}\n\nPor favor envíanos tu solicitud de empleo o CV por este medio y nosotros te contactaremos para entrevista.`;
   }
-  return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\nAplicaste para: ${selectedBranch.nombre}\n📍 Dirección: ${selectedBranch.direccion}\n📞 Teléfono: ${selectedBranch.telefono}\n\nPor favor lleva tu solicitud de empleo de 11:00 AM a 7:00 PM y te contactaremos para entrevista.\n\n¡Te esperamos para formar parte del equipo! 🍕🗽✨`;
+  // Si no se detecta sucursal, mensaje genérico
+  return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\nPor favor envíanos tu solicitud de empleo o CV por este medio y nosotros te contactaremos para entrevista.`;
 }
 
 // Manejador para peticiones POST (webhook de WhatsApp)
@@ -193,12 +193,12 @@ export async function POST(req: NextRequest) {
       const nextQuestion = currentQuestion + 1;
 
       if (currentQuestion === 1) {
-        // Después de la primera pregunta (edad), mostrar sucursales
+        // Después de la primera pregunta (edad), preguntar por la sucursal sin mostrar listado
         await prisma.surveyProgress.update({
           where: { id: progress.id },
           data: { currentQuestion: nextQuestion }
         });
-        await sendWhatsApp(phone, `✅ Perfecto!\n\n${getBranchListMessage()}`);
+        await sendWhatsApp(phone, `¿A qué sucursal de Pizzayork te gustaría aplicar? (Por favor menciona el nombre de la sucursal de tu preferencia)`);
       } else if (nextQuestion <= JOB_QUESTIONS.length + 1) {
         // Para las siguientes preguntas normales
         await prisma.surveyProgress.update({
