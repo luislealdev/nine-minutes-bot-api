@@ -75,10 +75,33 @@ const BRANCH_KEYWORDS = BRANCHES.map(branch => {
     branch.nombre.toLowerCase(),
     branch.direccion.toLowerCase(),
   ];
-  // Agregar variantes comunes
-  if (branch.nombre.toLowerCase().includes("jaral")) {
-    keywords.push("jaral del progreso", "jaral progreso", "progreso", "porfirio díaz", "gto jaral", "jaral gto");
+  
+  // Extraer palabras individuales de la dirección y nombre
+  const direccionWords = branch.direccion.toLowerCase().split(/[\s,]+/).filter(word => word.length > 2);
+  const nombreWords = branch.nombre.toLowerCase().split(/[\s,]+/).filter(word => word.length > 2);
+  keywords.push(...direccionWords, ...nombreWords);
+  
+  // Agregar variantes específicas por sucursal
+  if (branch.key === "patria") {
+    keywords.push("patria", "querétaro", "qro", "av patria");
+  } else if (branch.key === "americas") {
+    keywords.push("américas", "americas", "querétaro", "qro", "las américas", "las americas");
+  } else if (branch.key === "mompani") {
+    keywords.push("mompani", "paseo", "paseo de querétaro", "querétaro", "qro");
+  } else if (branch.key === "sanisidro") {
+    keywords.push("san isidro", "isidro", "valle", "valle de santiago", "salamanca", "gto");
+  } else if (branch.key === "centro") {
+    keywords.push("centro", "sánchez", "torrado", "salamanca", "gto");
+  } else if (branch.key === "apaseo") {
+    keywords.push("apaseo", "apaseo el grande", "grande", "galeana", "andador", "gto");
+  } else if (branch.key === "comonfort") {
+    keywords.push("comonfort", "ignacio", "allende", "gto");
+  } else if (branch.key === "jaral") {
+    keywords.push("jaral", "jaral del progreso", "jaral progreso", "progreso", "porfirio", "díaz", "diaz", "gto");
+  } else if (branch.key === "salvatierra") {
+    keywords.push("salvatierra", "federico", "escobedo", "gto");
   }
+  
   return { branch, keywords };
 });
 
