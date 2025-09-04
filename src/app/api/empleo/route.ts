@@ -68,53 +68,97 @@ const BRANCHES = [
 ];
 
 
-// Generar palabras clave para cada sucursal
-const BRANCH_KEYWORDS = BRANCHES.map(branch => {
-  const keywords = [
-    branch.key.toLowerCase(),
-    branch.nombre.toLowerCase(),
-    branch.direccion.toLowerCase(),
-  ];
-  
-  // Extraer palabras individuales de la dirección y nombre
-  const direccionWords = branch.direccion.toLowerCase().split(/[\s,]+/).filter(word => word.length > 2);
-  const nombreWords = branch.nombre.toLowerCase().split(/[\s,]+/).filter(word => word.length > 2);
-  keywords.push(...direccionWords, ...nombreWords);
-  
-  // Agregar variantes específicas por sucursal
-  if (branch.key === "patria") {
-    keywords.push("patria", "querétaro", "qro", "av patria");
-  } else if (branch.key === "americas") {
-    keywords.push("américas", "americas", "querétaro", "qro", "las américas", "las americas");
-  } else if (branch.key === "mompani") {
-    keywords.push("mompani", "paseo", "paseo de querétaro", "querétaro", "qro");
-  } else if (branch.key === "sanisidro") {
-    keywords.push("san isidro", "isidro", "valle", "valle de santiago", "salamanca", "gto");
-  } else if (branch.key === "centro") {
-    keywords.push("centro", "sánchez", "torrado", "salamanca", "gto");
-  } else if (branch.key === "apaseo") {
-    keywords.push("apaseo", "apaseo el grande", "grande", "galeana", "andador", "gto");
-  } else if (branch.key === "comonfort") {
-    keywords.push("comonfort", "ignacio", "allende", "gto");
-  } else if (branch.key === "jaral") {
-    keywords.push("jaral", "jaral del progreso", "jaral progreso", "progreso", "porfirio", "díaz", "diaz", "gto");
-  } else if (branch.key === "salvatierra") {
-    keywords.push("salvatierra", "federico", "escobedo", "gto");
+// Agrupar sucursales por ciudad
+const CITIES = {
+  "querétaro": {
+    name: "Querétaro",
+    keywords: ["querétaro", "qro", "queretaro"],
+    branches: ["patria", "americas", "mompani"]
+  },
+  "salamanca": {
+    name: "Salamanca",
+    keywords: ["salamanca", "gto salamanca"],
+    branches: ["sanisidro", "centro"]
+  },
+  "apaseo": {
+    name: "Apaseo El Grande",
+    keywords: ["apaseo", "apaseo el grande", "apaseo grande", "grande"],
+    branches: ["apaseo"]
+  },
+  "comonfort": {
+    name: "Comonfort",
+    keywords: ["comonfort"],
+    branches: ["comonfort"]
+  },
+  "jaral": {
+    name: "Jaral del Progreso",
+    keywords: ["jaral", "jaral del progreso", "jaral progreso", "progreso"],
+    branches: ["jaral"]
+  },
+  "salvatierra": {
+    name: "Salvatierra",
+    keywords: ["salvatierra"],
+    branches: ["salvatierra"]
   }
-  
-  return { branch, keywords };
-});
+};
+
+// Función para detectar ciudad
+function detectCity(message: string): string | null {
+  const messageLower = message.toLowerCase();
+  for (const [cityKey, cityData] of Object.entries(CITIES)) {
+    if (cityData.keywords.some(keyword => messageLower.includes(keyword))) {
+      return cityKey;
+    }
+  }
+  return null;
+}
+
+// Función para detectar sucursal específica (cuando hay múltiples en una ciudad)
+function detectBranchInCity(message: string, cityKey: string) {
+  const messageLower = message.toLowerCase();
+  const cityBranches = CITIES[cityKey as keyof typeof CITIES].branches;
+
+  for (const branchKey of cityBranches) {
+    const branch = BRANCHES.find(b => b.key === branchKey);
+    if (!branch) continue;
+
+    // Verificar por nombre de sucursal o palabras clave específicas
+    if (messageLower.includes(branch.key) ||
+      messageLower.includes(branch.nombre.toLowerCase()) ||
+      (branch.key === "patria" && messageLower.includes("patria")) ||
+      (branch.key === "americas" && (messageLower.includes("américas") || messageLower.includes("americas"))) ||
+      (branch.key === "mompani" && (messageLower.includes("mompani") || messageLower.includes("paseo"))) ||
+      (branch.key === "sanisidro" && (messageLower.includes("san isidro") || messageLower.includes("isidro") || messageLower.includes("valle"))) ||
+      (branch.key === "centro" && messageLower.includes("centro"))) {
+      return branch;
+    }
+  }
+  return null;
+}
 
 
 function getFinalMessage(sucursal: string) {
   const sucursalLower = sucursal.toLowerCase();
   let selectedBranch = null;
-  for (const { branch, keywords } of BRANCH_KEYWORDS) {
-    if (keywords.some(keyword => sucursalLower.includes(keyword))) {
+
+  // Buscar directamente en las sucursales
+  for (const branch of BRANCHES) {
+    if (sucursalLower.includes(branch.key) ||
+      sucursalLower.includes(branch.nombre.toLowerCase()) ||
+      (branch.key === "patria" && sucursalLower.includes("patria")) ||
+      (branch.key === "americas" && (sucursalLower.includes("américas") || sucursalLower.includes("americas"))) ||
+      (branch.key === "mompani" && (sucursalLower.includes("mompani") || sucursalLower.includes("paseo"))) ||
+      (branch.key === "sanisidro" && (sucursalLower.includes("san isidro") || sucursalLower.includes("isidro") || sucursalLower.includes("valle"))) ||
+      (branch.key === "centro" && sucursalLower.includes("centro")) ||
+      (branch.key === "apaseo" && sucursalLower.includes("apaseo")) ||
+      (branch.key === "comonfort" && sucursalLower.includes("comonfort")) ||
+      (branch.key === "jaral" && (sucursalLower.includes("jaral") || sucursalLower.includes("progreso"))) ||
+      (branch.key === "salvatierra" && sucursalLower.includes("salvatierra"))) {
       selectedBranch = branch;
       break;
     }
   }
+
   if (selectedBranch) {
     return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\nAplicaste para: ${selectedBranch.nombre}\n📍 Dirección: ${selectedBranch.direccion}\n📞 Teléfono: ${selectedBranch.telefono}\n\nPor favor envíanos tu solicitud de empleo o CV por este medio y nosotros te contactaremos para entrevista.\n\n¡Te esperamos para formar parte del equipo! 🍕🗽✨`;
   }
@@ -216,12 +260,12 @@ export async function POST(req: NextRequest) {
       const nextQuestion = currentQuestion + 1;
 
       if (currentQuestion === 1) {
-        // Después de la primera pregunta (edad), preguntar por la sucursal sin mostrar listado
+        // Después de la primera pregunta (edad), preguntar por la ciudad
         await prisma.surveyProgress.update({
           where: { id: progress.id },
           data: { currentQuestion: nextQuestion }
         });
-        await sendWhatsApp(phone, `¿A qué sucursal de Pizzayork te gustaría aplicar? (Por favor menciona el nombre de la sucursal de tu preferencia)`);
+        await sendWhatsApp(phone, `¿En qué ciudad te gustaría trabajar? (Por favor menciona el nombre de la ciudad)`);
       } else if (nextQuestion <= JOB_QUESTIONS.length + 1) {
         // Para las siguientes preguntas normales
         await prisma.surveyProgress.update({
@@ -258,22 +302,76 @@ export async function POST(req: NextRequest) {
         timestamp: new Date().toISOString()
       });
     } else {
-      // Respuesta no válida o pregunta de sucursal
+      // Respuesta no válida o pregunta de ciudad/sucursal
       if (currentQuestion === 2) {
-        // Guardar la sucursal mencionada
-        const nextQuestion = currentQuestion + 1;
-        await prisma.surveyProgress.update({
-          where: { id: progress.id },
-          data: {
-            currentQuestion: nextQuestion,
-            sucursal: message // Guardar la respuesta de sucursal
+        // Manejar respuesta de ciudad
+        const cityKey = detectCity(message);
+        if (cityKey) {
+          const cityData = CITIES[cityKey as keyof typeof CITIES];
+          const cityBranches = cityData.branches.map(branchKey =>
+            BRANCHES.find(b => b.key === branchKey)!
+          );
+
+          if (cityBranches.length === 1) {
+            // Solo una sucursal en esta ciudad, continuar automáticamente
+            const nextQuestion = currentQuestion + 1;
+            await prisma.surveyProgress.update({
+              where: { id: progress.id },
+              data: {
+                currentQuestion: nextQuestion,
+                sucursal: cityBranches[0].nombre // Guardar la sucursal
+              }
+            });
+            await sendWhatsApp(phone, `✅ Perfecto! Ciudad registrada: ${cityData.name} - ${cityBranches[0].nombre}.\n\n${JOB_QUESTIONS[nextQuestion - 2]}`);
+          } else {
+            // Múltiples sucursales, mostrar opciones
+            let branchList = `✅ Perfecto! Tenemos las siguientes sucursales en ${cityData.name}:\n\n`;
+            cityBranches.forEach((branch, idx) => {
+              branchList += `${idx + 1}. ${branch.nombre}\n`;
+            });
+            branchList += `\n¿A qué sucursal te gustaría aplicar? (Por favor menciona el nombre de la sucursal)`;
+
+            await prisma.surveyProgress.update({
+              where: { id: progress.id },
+              data: {
+                currentQuestion: 2.5, // Estado intermedio para selección de sucursal
+                sucursal: cityKey // Guardar la ciudad temporalmente
+              }
+            });
+            await sendWhatsApp(phone, branchList);
           }
-        });
-        await sendWhatsApp(phone, `✅ Perfecto! Sucursal registrada.\n\n${JOB_QUESTIONS[nextQuestion - 2]}`);
+        } else {
+          await sendWhatsApp(phone, "No reconozco esa ciudad. Por favor menciona una ciudad donde tengamos sucursales (Querétaro, Salamanca, Apaseo El Grande, Comonfort, Jaral del Progreso, Salvatierra).");
+        }
         return NextResponse.json({
           success: true,
-          message: 'Sucursal registrada',
-          currentQuestion: nextQuestion,
+          message: 'Ciudad procesada',
+          currentQuestion: currentQuestion,
+          timestamp: new Date().toISOString()
+        });
+      } else if (progress.currentQuestion === 2.5) {
+        // Manejar selección de sucursal específica
+        const cityKey = progress.sucursal;
+        if (cityKey) {
+          const selectedBranch = detectBranchInCity(message, cityKey);
+          if (selectedBranch) {
+            const nextQuestion = 3;
+            await prisma.surveyProgress.update({
+              where: { id: progress.id },
+              data: {
+                currentQuestion: nextQuestion,
+                sucursal: selectedBranch.nombre
+              }
+            });
+            await sendWhatsApp(phone, `✅ Perfecto! Sucursal registrada: ${selectedBranch.nombre}.\n\n${JOB_QUESTIONS[nextQuestion - 2]}`);
+          } else {
+            await sendWhatsApp(phone, "No reconozco esa sucursal. Por favor menciona el nombre de una de las sucursales listadas anteriormente.");
+          }
+        }
+        return NextResponse.json({
+          success: true,
+          message: 'Sucursal procesada',
+          currentQuestion: progress.currentQuestion,
           timestamp: new Date().toISOString()
         });
       } else {

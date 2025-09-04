@@ -11,7 +11,7 @@ datasource db {
 
 model SurveyProgress {
     id              Int      @id @default(autoincrement())
-    currentQuestion Int?
+    currentQuestion Float?   // Cambiado a Float para soportar 2.5
     phoneNumber     String?
     sucursal        String?  // Para guardar la sucursal mencionada
     isCompleted     Boolean  @default(false)
