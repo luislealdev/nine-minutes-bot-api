@@ -64,6 +64,12 @@ const BRANCHES = [
     nombre: "Sucursal Salvatierra",
     telefono: "466 663 0348",
     direccion: "Federico Escobedo, Salvatierra, Gto."
+  },
+  {
+    key: "silao",
+    nombre: "Sucursal Silao",
+    telefono: "",
+    direccion: "Calle 5 de mayo #14 esquina con calle honda, frente al registro civil, Silao, Gto."
   }
 ];
 
@@ -99,6 +105,11 @@ const CITIES = {
     name: "Salvatierra",
     keywords: ["salvatierra"],
     branches: ["salvatierra"]
+  },
+  "silao": {
+    name: "Silao",
+    keywords: ["silao", "5 de mayo", "registro civil", "honda"],
+    branches: ["silao"]
   }
 };
 
