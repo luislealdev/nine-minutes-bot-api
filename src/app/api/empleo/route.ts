@@ -171,10 +171,10 @@ function getFinalMessage(sucursal: string) {
   }
 
   if (selectedBranch) {
-    return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\nAplicaste para: ${selectedBranch.nombre}\n📍 Dirección: ${selectedBranch.direccion}\n📞 Teléfono: ${selectedBranch.telefono}\n\nPor favor envíanos tu solicitud de empleo o CV por este medio y nosotros te contactaremos para entrevista.\n\n¡Te esperamos para formar parte del equipo! 🍕🗽✨`;
+    return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\nAplicaste para: ${selectedBranch.nombre}\n📍 Dirección: ${selectedBranch.direccion}\nPor favor llévanos tu solicitud o CV a la sucursal correspondiente y te agendamos una cita\n\n¡Te esperamos para formar parte del equipo! 🍕🗽✨`;
   }
   // Si no se detecta sucursal, mensaje genérico
-  return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\nPor favor envíanos tu solicitud de empleo o CV por este medio y nosotros te contactaremos para entrevista.`;
+  return `🎉 ¡Felicidades! Has completado exitosamente el proceso de solicitud.\n\nPor favor llévanos tu solicitud o CV a la sucursal correspondiente y te agendamos una cita`;
 }
 
 // Manejador para peticiones POST (webhook de WhatsApp)
