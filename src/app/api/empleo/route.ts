@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma';
 // Array de las preguntas para solicitud de empleo - Pizzayork
 const JOB_QUESTIONS = [
   "¡Hola! Bienvenido al proceso de solicitud de empleo de Pizzayork. 🍕🗽\n\n¿Tienes al menos 18 años de edad?",
-  "¿Tienes disponibilidad para rotar entre turno matutino y vespertino?",
+  // "¿Tienes disponibilidad para rotar entre turno matutino y vespertino?",
   "¿Tienes disponibilidad para trabajar fines de semana?"
 ];
 
